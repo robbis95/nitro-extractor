@@ -39,14 +39,14 @@ class NitroExtractor
     {
         if (fs.existsSync('assets')) return;
 
-        fs.mkdir('assets', () => { });
+        fs.mkdirSync('assets');
         
         let arr = ['compile','compiled','extract','extracted']
         let arr2 = ['furni', 'clothing', 'effects', 'pets'];
 
         arr.forEach(el =>
         {
-            fs.mkdir(`assets/${el}`, () => { });
+            fs.mkdirSync(`assets/${el}`);
 
             arr2.forEach((ele) =>
             {
@@ -88,17 +88,16 @@ class NitroExtractor
             files.forEach(async file =>
             {
                 console.log(`compiling ${files.length} ${folder}`);
+
                 const nitroBundle = new NitroBundler();
-                fs.readdir(`assets/compile/${folder}/${file}`, (err, assets) =>
+                const assets = fs.readdirSync(`assets/compile/${folder}/${file}`);
+
+                assets.forEach(asset =>
                 {
-                    assets.forEach(asset =>
-                    {
-                        fs.readFile(`assets/extract/${folder}/${asset}`, (err, data) =>
-                        {
-                            nitroBundle.addFile(asset,data);
-                        });
-                    })
+                    const data = fs.readFileSync(`assets/compile/${folder}/${file}/${asset}`);
+                    nitroBundle.addFile(asset, data);
                 });
+
                 await writeFile(`assets/compiled/${folder}/${file}.nitro`, await nitroBundle.toBufferAsync());
             });
         })
